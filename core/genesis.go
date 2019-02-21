@@ -226,10 +226,13 @@ func (g *Genesis) ToBlock(db ethdb.Database) *types.Block {
 	}
 	statedb, _ := state.New(common.Hash{}, state.NewDatabase(db))
 	for addr, account := range g.Alloc {
+		log.Info("Address", "value", addr)
+		log.Info("     ", "Balance", account.Balance, "Code", account.Code, "Nonce", account.Nonce)
 		statedb.AddBalance(addr, account.Balance)
 		statedb.SetCode(addr, account.Code)
 		statedb.SetNonce(addr, account.Nonce)
 		for key, value := range account.Storage {
+			log.Info("         ", "Key", key, "Value", value)
 			statedb.SetState(addr, key, value)
 		}
 	}
@@ -247,6 +250,17 @@ func (g *Genesis) ToBlock(db ethdb.Database) *types.Block {
 		Coinbase:   g.Coinbase,
 		Root:       root,
 	}
+  log.Info("Genesis", "Number:", head.Number)
+  log.Info("Genesis", "Nonce:", head.Nonce)
+  log.Info("Genesis", "Time:", head.Time)
+  log.Info("Genesis", "ParentHash:", head.ParentHash)
+  log.Info("Genesis", "Extra:", head.Extra)
+  log.Info("Genesis", "GasLimit:", head.GasLimit)
+  log.Info("Genesis", "GasUsed:", head.GasUsed)
+  log.Info("Genesis", "Difficulty:", head.Difficulty)
+  log.Info("Genesis", "MixDigest:", head.MixDigest)
+  log.Info("Genesis", "Coinbase:", head.Coinbase)
+  log.Info("Genesis", "Root:", head.Root)
 	if g.GasLimit == 0 {
 		head.GasLimit = params.GenesisGasLimit
 	}
@@ -266,6 +280,7 @@ func (g *Genesis) Commit(db ethdb.Database) (*types.Block, error) {
 	if block.Number().Sign() != 0 {
 		return nil, fmt.Errorf("can't commit genesis block with number > 0")
 	}
+	log.Info("Genesis", "Hash:", block.Hash())
 	rawdb.WriteTd(db, block.Hash(), block.NumberU64(), g.Difficulty)
 	rawdb.WriteBlock(db, block)
 	rawdb.WriteReceipts(db, block.Hash(), block.NumberU64(), nil)
